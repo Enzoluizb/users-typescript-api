@@ -3,28 +3,38 @@ import { config } from "dotenv";
 import { GetUsersController } from "./controllers/get-users/get-users";
 import { MongoGetUsersRepository } from "./repositories/get-users/mongo-get-users";
 import { MongoClient } from "./database/mongo";
-
+import { MongoCreateUserRepository } from "./repositories/create-user/mongo-create-user";
+import { CreateUserController } from "./controllers/create-user/create-user";
 
 const main = async () => {
-  config();
+    config();
 
-  const app = express();
+    const app = express();
+    app.use(express.json()); // Adiciona o middleware para permitir parsing de JSON no body
 
-  await MongoClient.connect()
+    await MongoClient.connect();
 
-  app.get("/users", async (req, res) => {
-    const mongoGetUsersRepository = new MongoGetUsersRepository();
+    app.get("/users", async (req, res) => {
+        const mongoGetUsersRepository = new MongoGetUsersRepository();
+        const getUsersController = new GetUsersController(mongoGetUsersRepository);
 
-    const getUsersController = new GetUsersController(mongoGetUsersRepository);
+        const { body, statusCode } = await getUsersController.handle();
 
-    const { body, statusCode } = await getUsersController.handle()
+        res.status(statusCode).send(body);
+    });
 
-    res.send(body).status(statusCode)
-  });
+    app.post('/users', async (req, res) => {
+        const mongoCreateUserRepository = new MongoCreateUserRepository();
+        const createUserController = new CreateUserController(mongoCreateUserRepository);
 
-  const port = process.env.PORT || 8000;
+        const { body, statusCode } = await createUserController.handle({ body: req.body });
 
-  app.listen(port, () => console.log(`listening on port ${port}!`));
-}
+        res.status(statusCode).send(body);
+    });
+
+    const port = process.env.PORT || 8000;
+
+    app.listen(port, () => console.log(`listening on port ${port}!`));
+};
 
 main();
