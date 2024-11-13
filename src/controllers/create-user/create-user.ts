@@ -9,7 +9,6 @@ export class CreateUserController implements ICreateUserController {
 
     async handle(httpRequest: HttpRequest<CreateUserParams>): Promise<HttpResponse<User>> {
         try {
-            // verificar campos obrigatórios
             const requiredFields = ["firstName", "lastName", "email", "password"];
 
             for (const field of requiredFields) {
