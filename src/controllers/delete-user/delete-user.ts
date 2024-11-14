@@ -24,7 +24,7 @@ export class DeleteUserController implements IController {
         } catch (error) {
             return {
                 statusCode: 500,
-                body: "Somethint went wrong"
+                body: "Something went wrong"
             }
         }
     }
